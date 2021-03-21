@@ -6,6 +6,13 @@ Prediction from Trajectories"
 ## Prerequisities
 - [Anaconda](https://anaconda.org/) >= 4.9.2
 
+## Data
+
+Follow the instructions
+[here](https://github.com/facebookresearch/VideoPose3D/blob/master/DATASETS.md)
+on how to obtain the dataset (section `Human3.6M`). Put the resulting
+`data_3d_h36m.npz` file in `data/processed/human36m-3d/`.
+
 ## Installation
 
 
