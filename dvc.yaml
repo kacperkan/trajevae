@@ -1,0 +1,77 @@
+stages:
+  trajevae-train:
+    cmd: python -m trajevae.trainers.base_trainer data/processed/human36m-3d/ --config_name
+      trajevae.h36m --module_name trajevae.TrajeVAE
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - trajevae
+    outs:
+    - outputs/models/trajevae-h36m
+  trajevae-eval:
+    cmd: python -m trajevae.evaluators.experiment data/processed/human36m-3d/ --config_name
+      trajevae.h36m --module_name trajevae.TrajeVAE --without_visualization
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - outputs/models/trajevae-h36m
+    - trajevae
+    outs:
+    - outputs/results/trajevae-h36m
+  rnn-train:
+    cmd: python -m trajevae.trainers.base_trainer data/processed/human36m-3d/ --config_name
+      rnn.h36m --module_name baselines.rnn.Model
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - trajevae
+    outs:
+    - outputs/models/rnn-h36m
+  rnn-eval:
+    cmd: python -m trajevae.evaluators.experiment data/processed/human36m-3d/ --config_name
+      rnn.h36m --module_name baselines.rnn.Model --without_visualization
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - outputs/models/rnn-h36m
+    - trajevae
+    outs:
+    - outputs/results/rnn-h36m
+  cvae-train:
+    cmd: python -m trajevae.trainers.base_trainer data/processed/human36m-3d/ --config_name
+      cvae.h36m --module_name baselines.cvae.Model
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - trajevae
+    outs:
+    - outputs/models/cvae-h36m
+  cvae-eval:
+    cmd: python -m trajevae.evaluators.experiment data/processed/human36m-3d/ --config_name
+      cvae.h36m --module_name baselines.cvae.Model --without_visualization
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - outputs/models/cvae-h36m
+    - trajevae
+    outs:
+    - outputs/results/cvae-h36m
+  moglow-train:
+    cmd: python -m trajevae.trainers.base_trainer data/processed/human36m-3d/ --config_name
+      moglow.h36m --module_name moglow.models.Glow
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - trajevae
+    outs:
+    - outputs/models/moglow-h36m
+  moglow-eval:
+    cmd: python -m trajevae.evaluators.experiment data/processed/human36m-3d/ --config_name
+      moglow.h36m --module_name moglow.models.Glow --without_visualization
+    deps:
+    - data/processed/human36m-3d/data_3d_h36m.npz
+    - outputs/models/moglow-h36m
+    - trajevae
+    outs:
+    - outputs/results/moglow-h36m
+  print:
+    cmd: echo outputs/results/trajevae-h36m/stats_1.csv outputs/results/rnn-h36m/stats_1.csv
+      outputs/results/cvae-h36m/stats_1.csv outputs/results/moglow-h36m/stats_1.csv
+    deps:
+    - outputs/results/cvae-h36m
+    - outputs/results/moglow-h36m
+    - outputs/results/rnn-h36m
+    - outputs/results/trajevae-h36m
