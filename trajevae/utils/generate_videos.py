@@ -36,7 +36,6 @@ def process_single_rendering_files_in_folder(folder: str):
                 + "_".join(x.name.split("_")[2:])
             )
         )
-        .filter_not(lambda x: "eating" in x.as_posix())
         .filter_not(lambda x: "deterministic" in x.as_posix())
         .filter_not(lambda x: x.name.startswith("trajectory"))
         .to_set()

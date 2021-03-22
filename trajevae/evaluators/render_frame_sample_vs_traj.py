@@ -6,18 +6,18 @@ import numpy as np
 import torch
 import tqdm
 from easydict import EasyDict
-from trajevae.common import copy2cpu, load_model_module
-from trajevae.data.dataloaders import get_dataloaders
-from trajevae.models.trajevae import TrajeVAE
-from trajevae.utils.general import load_models, tensors_to_cuda
-from trajevae.utils.rendering import (
+from trajegan.common import copy2cpu, load_model_module
+from trajegan.data.dataloaders import get_dataloaders
+from trajegan.models.pose2pose import Pose2Pose
+from trajegan.utils.general import load_models, tensors_to_cuda
+from trajegan.utils.rendering import (
     build_humanoid,
     build_trajectory,
     colormap,
     render_with_trajectories,
     wrap_in_scene,
 )
-from trajevae.utils.skeleton import Skeleton
+from trajegan.utils.skeleton import Skeleton
 
 FRAMES_TO_RENDER = list(range(100))
 
@@ -85,7 +85,7 @@ def get_folder_name(
 def get_prediction(
     data: torch.Tensor,
     trajectory: torch.Tensor,
-    model: TrajeVAE,
+    model: Pose2Pose,
     device: torch.device,
     dtype: torch.dtype,
     t_his: int,
@@ -117,7 +117,7 @@ def get_prediction(
 
 @torch.no_grad()
 def generate_sequence_for_datatype(
-    model: TrajeVAE,
+    model: Pose2Pose,
     dataset_split: str,
     data_path: str,
     config: EasyDict,
@@ -159,6 +159,15 @@ def generate_sequence_for_datatype(
             sample["frame_end"].item(),
             sample["trajectory"].shape[-2],
         )
+        while sample_name != "eating-S9-2050-2151_17":
+            sample = next(loader_iterator)
+            sample_name = get_folder_name(
+                "_".join(sample["action"][0].lower().split()),
+                sample["subject"][0],
+                sample["frame_start"].item(),
+                sample["frame_end"].item(),
+                sample["trajectory"].shape[-2],
+            )
 
         sample = tensors_to_cuda(sample, device)
         pred = get_prediction(
@@ -239,7 +248,7 @@ def generate_sequence_for_datatype(
 
 @torch.no_grad()
 def generate_sequence(
-    model: TrajeVAE, data_path: str, config: EasyDict, device: torch.device
+    model: Pose2Pose, data_path: str, config: EasyDict, device: torch.device
 ):
     generate_sequence_for_datatype(
         model, "valid", data_path, config, device, torch.float32
@@ -247,7 +256,7 @@ def generate_sequence(
 
 
 def main():
-    from trajevae.common import load_config_and_args
+    from trajegan.common import load_config_and_args
 
     config, args = load_config_and_args()
     config.joint_indices_to_use = (
@@ -265,7 +274,7 @@ def main():
     )
 
     model = load_model_module(
-        "trajevae.models.{}".format(args["module_name"])
+        "trajegan.models.{}".format(args["module_name"])
     )(config, args["test_run"]).to(device)
     model = model.eval()
 
